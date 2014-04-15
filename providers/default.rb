@@ -19,6 +19,15 @@ def load_current_resource
     end
     new_resource.files processed
   end
+
+  if global_multiline_regex
+    Chef::Log.debug "Multiline regex: global setting detected for #{new_resource.files}"
+    updated_files = new_resource.files.map do |file|
+      inject_multiline_regex(file)
+    end
+    Chef::Log.debug "Multiline regex: updated files #{new_resource.files}"
+    new_resource.files updated_files
+  end
 end
 
 action :create do
@@ -27,12 +36,12 @@ action :create do
 
   # Build out our paths
 
-  basedir = ::File.join(new_resource.base_dir, new_resource.name)
-  service_name = "beaver-#{new_resource.name}"
+  basedir        = ::File.join(new_resource.base_dir, new_resource.name)
+  service_name   = "beaver-#{new_resource.name}"
   service_action = [:enable, :start]
-  conf_file = ::File.join(basedir, 'etc/beaver.conf')
-  log_file = ::File.join(new_resource.log_dir, "#{service_name}.log")
-  pid_file = ::File.join(new_resource.pid_dir, "#{service_name}.pid")
+  conf_file      = ::File.join(basedir, 'etc/beaver.conf')
+  log_file       = ::File.join(new_resource.log_dir, "#{service_name}.log")
+  pid_file       = ::File.join(new_resource.pid_dir, "#{service_name}.pid")
 
   # Cache our attributes so we can easily pass them through
 
@@ -161,4 +170,38 @@ action :create do
     rotate 30
     create "0440 #{new_args[:user]} #{new_args[:group]}"
   end
+end
+
+private
+
+def global_multiline_regex
+  new_resource.multiline_regex_after || new_resource.multiline_regex_before
+end
+
+def inject_multiline_regex(file)
+  %w(multiline_regex_after multiline_regex_before).each do |key|
+    Chef::Log.debug "Multiline regex: checking #{key} for #{file}"
+    if new_resource.send(key)
+      file[key] = merge_regex(new_resource.send(key), file[key])
+      Chef::Log.debug "Multiline regex: #{key} merged to #{file}"
+    end
+  end
+  file
+end
+
+def merge_regex(*args)
+  Chef::Log.debug "Multiline regex: merge regex #{args}"
+  result = []
+  args.each do |arg|
+    unless arg.nil? || arg.empty?
+      arg.split('|').each do |exp|
+        if /\((.*?)\)/.match(exp)
+          result << exp
+        else
+          result << "(#{exp})"
+        end
+      end
+    end
+  end
+  result.join('|') unless result.empty?
 end
