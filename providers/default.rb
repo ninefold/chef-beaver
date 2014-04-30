@@ -96,6 +96,7 @@ action :create do
   end
 
   cmd = "beaver -t #{new_resource.output.keys.first} -c #{conf_file}"
+  cmd << " -d" if new_resource.debug
 
   case new_resource.init_type
   when 'upstart'
