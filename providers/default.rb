@@ -193,14 +193,12 @@ end
 def merge_regex(*args)
   Chef::Log.debug "Multiline regex: merge regex #{args}"
   result = []
-  args.each do |arg|
-    unless arg.nil? || arg.empty?
-      arg.split('|').each do |exp|
-        if /\((.*?)\)/.match(exp)
-          result << exp
-        else
-          result << "(#{exp})"
-        end
+  args.each do |exp|
+    unless exp.nil? || exp.empty?
+      if /^\(.*\)$/.match(exp)
+        result << exp
+      else
+        result << "(#{exp})"
       end
     end
   end
