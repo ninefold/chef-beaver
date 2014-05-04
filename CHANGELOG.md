@@ -2,7 +2,9 @@
 
 ## 0.4.0
 
-* Add multiline regex rules for files
+* Add support for multiline regex rules for files; processing this in
+  beaver rather than logstash allows for better scalability and no
+  conflicts when there is more than one logstash instance...
 
 ## 0.3.0
 
