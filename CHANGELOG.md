@@ -1,5 +1,9 @@
 # CHANGELOG for beaver cookbook
 
+## 0.4.0
+
+* Add multiline regex rules for files
+
 ## 0.3.0
 
 * Check if service exists before doing immediate beaver restart; otherwise delayed
