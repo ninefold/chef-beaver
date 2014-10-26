@@ -1,5 +1,9 @@
 # CHANGELOG for beaver cookbook
 
+## 0.4.3
+
+* Support exclude patterns for globs
+
 ## 0.4.0
 
 * Add support for multiline regex rules for files; processing this in
